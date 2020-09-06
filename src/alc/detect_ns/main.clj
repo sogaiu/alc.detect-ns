@@ -26,12 +26,13 @@
                     (str "argument not a readable file: " first-arg))
             (slurp first-arg))
           (slurp *in*))]
-    (when-let [findings (validate/check-source slurped)]
-      (binding [*out* *err*]
-        (println "Errors detected in source")
-        (doseq [{:keys [message row]} findings]
-          (println "row:" row " - " message)))
-      (System/exit 1))
+    (when-not (System/getenv "ALC_NS_DETECT_SKIP_VALIDATION")
+      (when-let [findings (validate/check-source slurped)]
+        (binding [*out* *err*]
+          (println "Errors detected in source")
+          (doseq [{:keys [message row]} findings]
+            (println "row:" row " - " message)))
+        (System/exit 1)))
     (if-let [target-name (ast/detect-ns slurped)]
       (println target-name)
       (println)))
