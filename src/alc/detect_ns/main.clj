@@ -1,9 +1,5 @@
 ;; POSSIBILITIES
 ;;
-;; * mode to not validate -- e.g. to handle clojure.core
-;;
-;; * detect in-ns
-;;
 ;; * try to find all ns and in-ns -- then use the most appropriate one
 ;;   based on current cursot position (this is likely to be hard?)
 
