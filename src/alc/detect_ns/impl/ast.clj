@@ -304,16 +304,20 @@
 
 (comment
 
-  (def src-with-in-ns
+  (def in-ns-expr
     "(in-ns 'clojure.core)")
 
-  (first-form src-with-in-ns)
+  (first-form in-ns-expr)
   #_ '(:list
        (:symbol "in-ns") (:whitespace " ")
        (:quote
         (:symbol "clojure.core")))
 
-  (in-ns-form-2? (first-form src-with-in-ns))
+  (in-ns-form-2? (first-form in-ns-expr))
+  #_ '(:list
+       (:symbol "in-ns") (:whitespace " ")
+       (:quote
+        (:symbol "clojure.core")))
 
   )
 
@@ -421,11 +425,39 @@
 
   )
 
+;; XXX: quick and dirty
+(defn name-of-in-ns
+  [in-ns-ast]
+  (when (in-ns-form-2? in-ns-ast)
+    (->> in-ns-ast
+         (filter (fn [node]
+                   (when (coll? node)
+                     (= (first node) :quote))))
+         first
+         second
+         second)))
+
+(comment
+
+  (name-of-in-ns (first-form "(in-ns 'hello.person)"))
+  ;; => "hello.person"
+
+  )
+
 (defn detect-ns
   [source]
-  (->> (forms source)
-       (some ns-form-2?)
-       name-of-ns))
+  (let [source-forms (forms source)]
+    (if-let [name-try
+             (->> source-forms
+                  (some ns-form-2?)
+                  name-of-ns)]
+      name-try
+      (if-let [name-try-2
+               (->> source-forms
+                    (some in-ns-form-2?)
+                    name-of-in-ns)]
+        name-try-2
+        nil))))
 
 (comment
 
@@ -481,5 +513,11 @@
 
   (detect-ns src-with-ns-in-meta-node)
   ;; => "funname.here"
+
+  (def src-with-in-ns
+    "(in-ns 'clojure.core)")
+
+  (detect-ns src-with-in-ns)
+  ;; => "clojure.core"
 
   )
