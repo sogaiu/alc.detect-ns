@@ -191,7 +191,8 @@
 ;; XXX: determine what else needs to be ignored
 (defn list-head
   [ast]
-  (assert (list-node? ast) (str "not a list: " ast))
+  (when-not (list-node? ast)
+    (throw (Exception. (str "Not a list node: " ast))))
   (->> (rest ast)
        (drop-while (fn [node]
                      ;; XXX: other things to filter out?
@@ -247,7 +248,8 @@
 
 (defn symbol-name
   [ast]
-  (assert (symbol-node? ast) (str "not symbol node: " ast))
+  (when-not (symbol-node? ast)
+    (throw (Exception. (str "Not a symbol node: " ast))))
   (second ast))
 
 (comment

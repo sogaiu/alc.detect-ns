@@ -18,9 +18,11 @@
         slurped
         (if (string? first-arg)
           (let [f (cji/file first-arg)]
-            (assert (and (.exists f) (.isFile f))
-                    (str "argument not a readable file: " first-arg))
-            (slurp first-arg))
+            (if-not (and (.exists f) (.isFile f))
+              (do
+                (str "Argument not a readable file: " first-arg)
+                1)
+              (slurp first-arg)))
           (slurp *in*))]
     (when-not (System/getenv "ALC_NS_DETECT_SKIP_VALIDATION")
       (when-let [findings (validate/check-source slurped)]
