@@ -40,7 +40,7 @@
 (defn main
   [& args]
   (let [source-str (read-source (first args))]
-    (when-not (System/getenv "ALC_NS_DETECT_SKIP_VALIDATION")
+    (when-not (System/getenv "ALC_DETECT_NS_SKIP_VALIDATION")
       (validate source-str))
     (if-let [target-ns-name (ast/detect-ns source-str)]
       (println target-ns-name)
