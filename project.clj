@@ -1,4 +1,4 @@
-(defproject alc.detect-ns "0.0.1"
+(defproject alc.detect-ns "0.0.2"
   :description "Detect Namespace"
   :url "https://github.com/sogaiu/alc.detect-ns"
   :source-paths ["src"]
