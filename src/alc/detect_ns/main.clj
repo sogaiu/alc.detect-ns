@@ -12,7 +12,7 @@
 
 (set! *warn-on-reflection* true)
 
-(defn -main
+(defn main
   [& args]
   (let [first-arg (first args)
         slurped
@@ -28,9 +28,19 @@
           (println "Errors detected in source")
           (doseq [{:keys [message row]} findings]
             (println "row:" row " - " message)))
-        (System/exit 1)))
+        1))
     (if-let [target-name (ast/detect-ns slurped)]
       (println target-name)
       (println)))
-  (flush)
-  (System/exit 0))
+  0)
+
+(defn -main
+  [& args]
+  (let [exit
+        (try (apply main args)
+             (catch Throwable e
+               (binding [*out* *err*]
+                 (println "Unexpected Throwable"))
+               (.printStackTrace e)))]
+    (flush)
+    (System/exit exit)))
