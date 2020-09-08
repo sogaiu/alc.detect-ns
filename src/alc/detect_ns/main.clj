@@ -13,47 +13,53 @@
 
 (set! *warn-on-reflection* true)
 
+(defn read-source
+  [source]
+  (if (string? source)
+    (let [f (cji/file source)]
+      (if-not (and (.exists f) (.isFile f))
+        (throw
+         (ex-info "ALC_DETECT_NS_THROW"
+                  {:err-msg (str "Argument not a readable file: "
+                                 source)}))
+        (slurp source)))
+    (slurp *in*)))
+
+(defn validate
+  [source-str]
+  (when-let [findings (validate/check-source source-str)]
+    (throw (ex-info
+            "ALC_DETECT_NS_THROW"
+            {:err-msg (str "Errors detected in source:\n"
+                           (cs/join "\n"
+                                    (map (fn [{:keys [message row]}]
+                                           (str "  row:" row " - "
+                                                message))
+                                         findings)))}))))
+
 (defn main
   [& args]
-  (let [first-arg (first args)
-        slurped
-        (if (string? first-arg)
-          (let [f (cji/file first-arg)]
-            (if-not (and (.exists f) (.isFile f))
-              (throw (ex-info "ALC_DETECT_NS_THROW"
-                              {:err-msg (str "Argument not a readable file: "
-                                             first-arg)}))
-              (slurp first-arg)))
-          (slurp *in*))]
+  (let [source-str (read-source (first args))]
     (when-not (System/getenv "ALC_NS_DETECT_SKIP_VALIDATION")
-      (when-let [findings (validate/check-source slurped)]
-        (throw (ex-info
-                "ALC_DETECT_NS_THROW"
-                {:err-msg (str "Errors detected in source:\n"
-                               (cs/join "\n"
-                                        (map (fn [{:keys [message row]}]
-                                               (str "  row:" row " - "
-                                                    message))
-                                             findings)))}))))
-    (if-let [target-name (ast/detect-ns slurped)]
-      (println target-name)
+      (validate source-str))
+    (if-let [target-ns-name (ast/detect-ns source-str)]
+      (println target-ns-name)
       (println))
     0))
 
 (defn -main
   [& args]
-  (let [exit
+  (let [status
         (try (apply main args)
              (catch Throwable t
-               (if (= "ALC_DETECT_NS_THROW" (.getMessage t))
-                 (let [{:keys [:err-msg]} (ex-data t)]
-                   (binding [*out* *err*]
-                     (println err-msg))
-                   1)
-                 (do
-                   (binding [*out* *err*]
-                     (println "Unexpected Throwable"))
-                   (.printStackTrace t)
-                   2))))]
+               (binding [*out* *err*]
+                 (if (= "ALC_DETECT_NS_THROW" (.getMessage t))
+                   (do
+                     (println (:err-msg (ex-data t)))
+                     1)
+                   (do
+                     (println "Unexpected Throwable")
+                     (.printStackTrace t)
+                     2)))))]
     (flush)
-    (System/exit exit)))
+    (System/exit status)))
