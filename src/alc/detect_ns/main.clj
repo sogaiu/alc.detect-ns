@@ -7,7 +7,8 @@
   (:require
    [alc.detect-ns.impl.ast :as ast]
    [alc.detect-ns.impl.validate :as validate]
-   [clojure.java.io :as cji])
+   [clojure.java.io :as cji]
+   [clojure.string :as cs])
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -19,30 +20,41 @@
         (if (string? first-arg)
           (let [f (cji/file first-arg)]
             (if-not (and (.exists f) (.isFile f))
-              (do
-                (str "Argument not a readable file: " first-arg)
-                1)
+              (throw (ex-info "ALC_DETECT_NS_THROW"
+                              {:err-msg (str "Argument not a readable file: "
+                                             first-arg)}))
               (slurp first-arg)))
           (slurp *in*))]
     (when-not (System/getenv "ALC_NS_DETECT_SKIP_VALIDATION")
       (when-let [findings (validate/check-source slurped)]
-        (binding [*out* *err*]
-          (println "Errors detected in source")
-          (doseq [{:keys [message row]} findings]
-            (println "row:" row " - " message)))
-        1))
+        (throw (ex-info
+                "ALC_DETECT_NS_THROW"
+                {:err-msg (str "Errors detected in source:\n"
+                               (cs/join "\n"
+                                        (map (fn [{:keys [message row]}]
+                                               (str "  row:" row " - "
+                                                    message))
+                                             findings)))}))))
     (if-let [target-name (ast/detect-ns slurped)]
       (println target-name)
-      (println)))
-  0)
+      (println))
+    0))
 
 (defn -main
   [& args]
   (let [exit
         (try (apply main args)
-             (catch Throwable e
+             (catch Exception e
+               (if (= "ALC_DETECT_NS_THROW" (.getMessage e))
+                 (let [{:keys [:err-msg]} (ex-data e)]
+                   (binding [*out* *err*]
+                     (println err-msg))
+                   1)
+                 (throw e)))
+             (catch Throwable t
                (binding [*out* *err*]
                  (println "Unexpected Throwable"))
-               (.printStackTrace e)))]
+               (.printStackTrace t)
+               2))]
     (flush)
     (System/exit exit)))
