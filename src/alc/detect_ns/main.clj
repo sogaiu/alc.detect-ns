@@ -44,17 +44,16 @@
   [& args]
   (let [exit
         (try (apply main args)
-             (catch Exception e
-               (if (= "ALC_DETECT_NS_THROW" (.getMessage e))
-                 (let [{:keys [:err-msg]} (ex-data e)]
+             (catch Throwable t
+               (if (= "ALC_DETECT_NS_THROW" (.getMessage t))
+                 (let [{:keys [:err-msg]} (ex-data t)]
                    (binding [*out* *err*]
                      (println err-msg))
                    1)
-                 (throw e)))
-             (catch Throwable t
-               (binding [*out* *err*]
-                 (println "Unexpected Throwable"))
-               (.printStackTrace t)
-               2))]
+                 (do
+                   (binding [*out* *err*]
+                     (println "Unexpected Throwable"))
+                   (.printStackTrace t)
+                   2))))]
     (flush)
     (System/exit exit)))
