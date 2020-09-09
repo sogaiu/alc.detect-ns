@@ -24,22 +24,11 @@
         (slurp source)))
     (slurp *in*)))
 
-(defn validate
-  [source-str]
-  (when-let [findings (validate/check-source source-str)]
-    (ex/throw-info {:err-msg
-                    (str "Errors detected in source:\n"
-                         (cs/join "\n"
-                                  (map (fn [{:keys [message row]}]
-                                         (str "  row:" row " - "
-                                              message))
-                                       findings)))})))
-
 (defn main
   [& args]
   (let [source-str (read-source (first args))]
     (when-not (System/getenv "ALC_DETECT_NS_SKIP_VALIDATION")
-      (validate source-str))
+      (validate/do-it source-str))
     (if-let [target-ns-name (ast/detect-ns source-str)]
       (println target-ns-name)
       (println))
