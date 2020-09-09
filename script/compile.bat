@@ -16,7 +16,7 @@ call %GRAALVM_HOME%\bin\gu.cmd install native-image
 
 Rem the --no-server option is not supported in GraalVM Windows.
 call %GRAALVM_HOME%\bin\native-image.cmd ^
-  "-jar" "target/alc.detect-ns-0.0.1-standalone.jar" ^
+  "-jar" "target/alc.detect-ns-0.0.2-standalone.jar" ^
   "-H:Name=alc.detect-ns" ^
   "-H:+ReportExceptionStackTraces" ^
   "-J-Dclojure.spec.skip-macros=true" ^
