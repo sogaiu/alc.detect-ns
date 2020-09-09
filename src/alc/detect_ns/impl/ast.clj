@@ -1,5 +1,6 @@
 (ns alc.detect-ns.impl.ast
   (:require
+   [alc.detect-ns.impl.ex :as ex]
    [clojure.string :as cs]
    [parcera.core :as pc]))
 
@@ -192,9 +193,7 @@
 (defn list-head
   [ast]
   (when-not (list-node? ast)
-    (throw
-     (ex-info "ALC_DETECT_NS_THROW"
-              {:err-msg (str "Not a list node: " ast)})))
+    (ex/throw-info {:err-msg (str "Not a list node: " ast)}))
   (->> (rest ast)
        (drop-while (fn [node]
                      ;; XXX: other things to filter out?
@@ -251,9 +250,7 @@
 (defn symbol-name
   [ast]
   (when-not (symbol-node? ast)
-    (throw
-     (ex-info "ALC_DETECT_NS_THROW"
-              {:err-msg (str "Not a symbol node: " ast)})))
+    (ex/throw-info {:err-msg (str "Not a symbol node: " ast)}))
   (second ast))
 
 (comment
@@ -263,7 +260,7 @@
 
   )
 
-(defn ns-form-2?
+(defn ns-form?
   [ast]
   (when (and (list-node? ast)
              (symbol-node? (list-head ast))
@@ -280,7 +277,7 @@
         (:symbol "ns") (:whitespace " ")
         (:symbol "fun-namespace.main"))
 
-  (ns-form-2? (first-form src-with-just-ns))
+  (ns-form? (first-form src-with-just-ns))
   #_ '(:list
         (:symbol "ns") (:whitespace " ")
         (:symbol "fun-namespace.main"))
@@ -294,14 +291,14 @@
 (def b 2)
 ")
 
-  (some ns-form-2? (forms src-with-ns))
+  (some ns-form? (forms src-with-ns))
   #_ '(:list
        (:symbol "ns") (:whitespace " ")
        (:symbol "my-ns.core"))
 
   )
 
-(defn in-ns-form-2?
+(defn in-ns-form?
   [ast]
   (when (and (list-node? ast)
              (symbol-node? (list-head ast))
@@ -319,7 +316,7 @@
        (:quote
         (:symbol "clojure.core")))
 
-  (in-ns-form-2? (first-form in-ns-expr))
+  (in-ns-form? (first-form in-ns-expr))
   #_ '(:list
        (:symbol "in-ns") (:whitespace " ")
        (:quote
@@ -391,7 +388,7 @@
 
 (defn name-of-ns
   [ns-ast]
-  (when (ns-form-2? ns-ast)
+  (when (ns-form? ns-ast)
     (->> ns-ast
          (keep (fn [node]
                  (when (coll? node)
@@ -418,7 +415,7 @@
 (def c [])
 ")
 
-  (name-of-ns (some ns-form-2? (forms some-src-with-ns)))
+  (name-of-ns (some ns-form? (forms some-src-with-ns)))
   ;; => "your-ns.core"
 
   (def ns-with-meta
@@ -426,7 +423,7 @@
        :author \"some author\"}
   tricky-ns.here")
 
-  (name-of-ns (some ns-form-2? (forms ns-with-meta)))
+  (name-of-ns (some ns-form? (forms ns-with-meta)))
   ;; => "tricky-ns.here"
 
   )
@@ -434,7 +431,7 @@
 ;; XXX: quick and dirty
 (defn name-of-in-ns
   [in-ns-ast]
-  (when (in-ns-form-2? in-ns-ast)
+  (when (in-ns-form? in-ns-ast)
     (->> in-ns-ast
          (filter (fn [node]
                    (when (coll? node)
@@ -455,12 +452,12 @@
   (let [source-forms (forms source)]
     (if-let [name-try
              (->> source-forms
-                  (some ns-form-2?)
+                  (some ns-form?)
                   name-of-ns)]
       name-try
       (if-let [name-try-2
                (->> source-forms
-                    (some in-ns-form-2?)
+                    (some in-ns-form?)
                     name-of-in-ns)]
         name-try-2
         nil))))
