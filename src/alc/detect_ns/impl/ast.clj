@@ -192,7 +192,9 @@
 (defn list-head
   [ast]
   (when-not (list-node? ast)
-    (throw (Exception. (str "Not a list node: " ast))))
+    (throw
+     (ex-info "ALC_DETECT_NS_THROW"
+              {:err-msg (str "Not a list node: " ast)})))
   (->> (rest ast)
        (drop-while (fn [node]
                      ;; XXX: other things to filter out?
@@ -249,7 +251,9 @@
 (defn symbol-name
   [ast]
   (when-not (symbol-node? ast)
-    (throw (Exception. (str "Not a symbol node: " ast))))
+    (throw
+     (ex-info "ALC_DETECT_NS_THROW"
+              {:err-msg (str "Not a symbol node: " ast)})))
   (second ast))
 
 (comment
