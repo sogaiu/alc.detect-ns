@@ -19,13 +19,10 @@
               "(+ 2 2)"]))
 
   (forms src)
-  #_ '((:comment ";; another form")
-       (:whitespace "\n")
+  #_ '((:comment ";; another form") (:whitespace "\n")
        (:list
-        (:symbol "+")
-        (:whitespace " ")
-        (:number "2")
-        (:whitespace " ")
+        (:symbol "+") (:whitespace " ")
+        (:number "2") (:whitespace " ")
         (:number "2")))
 
   (forms "")
