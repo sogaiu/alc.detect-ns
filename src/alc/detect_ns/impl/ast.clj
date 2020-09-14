@@ -28,7 +28,7 @@
   (forms "")
   ;; => '()
 
-  )
+ ,)
 
 (defn first-form
   [src]
@@ -66,7 +66,7 @@
   (first-form src-with-line-comment)
   ;; => [:comment ";; hi there"]
 
-  )
+ ,)
 
 (defn list-node?
   [ast]
@@ -78,7 +78,7 @@
   (list-node? (first-form "(+ 1 1)"))
   ;; => true
 
-  )
+ ,)
 
 (defn whitespace?
   [ast]
@@ -90,7 +90,7 @@
   (whitespace? '(:whitespace "\n  "))
   ;; => true
 
-)
+  ,)
 
 (defn line-comment?
   [ast]
@@ -102,7 +102,7 @@
   (line-comment? '(:comment ";; hi there"))
   ;; => true
 
-  )
+ ,)
 
 (defn comment-symbol?
   [ast]
@@ -116,7 +116,7 @@
   (comment-symbol? '(:symbol "comment"))
   ;; => true
 
-  )
+ ,)
 
 (defn comment-block?
   [ast]
@@ -152,8 +152,7 @@
        count)
   ;; => 1
 
-  )
-
+  ,)
 
 (defn discard-with-form?
   [ast]
@@ -184,7 +183,7 @@
       (:number "1"))))
   ;; => true
 
-  )
+ ,)
 
 ;; XXX: determine what else needs to be ignored
 (defn list-head
@@ -227,7 +226,7 @@
   (list-head (first-form "(#_ - + 1 1)"))
   ;; => '(:symbol "+")
 
-  )
+ ,)
 
 (defn symbol-node?
   [ast]
@@ -242,7 +241,7 @@
   (symbol-node? (first-form ":hi"))
   ;; => false
 
-  )
+ ,)
 
 (defn symbol-name
   [ast]
@@ -255,7 +254,7 @@
   (symbol-name (first-form "hi"))
   ;; => "hi"
 
-  )
+ ,)
 
 (defn ns-form?
   [ast]
@@ -293,7 +292,7 @@
        (:symbol "ns") (:whitespace " ")
        (:symbol "my-ns.core"))
 
-  )
+ ,)
 
 (defn in-ns-form?
   [ast]
@@ -319,7 +318,7 @@
        (:quote
         (:symbol "clojure.core")))
 
-  )
+ ,)
 
 (defn metadata-node?
   [ast]
@@ -337,7 +336,7 @@
   (metadata-node? (first-form ":a"))
   ;; => false
 
-  )
+ ,)
 
 (defn metadata-entry-node?
   [ast]
@@ -355,7 +354,7 @@
   (metadata-entry-node? (first-form ":a"))
   ;; => false
 
-  )
+ ,)
 
 ;; XXX: likely not perfect
 (defn metadatee
@@ -381,7 +380,7 @@
   #_ '(:vector
        (:keyword ":y"))
 
-  )
+ ,)
 
 (defn name-of-ns
   [ns-ast]
@@ -416,14 +415,14 @@
   ;; => "your-ns.core"
 
   (def ns-with-meta
-  "(ns ^{:doc \"some doc string\"
+   "(ns ^{:doc \"some doc string\"
        :author \"some author\"}
   tricky-ns.here")
 
   (name-of-ns (some ns-form? (forms ns-with-meta)))
   ;; => "tricky-ns.here"
 
-  )
+ ,)
 
 ;; XXX: quick and dirty
 (defn name-of-in-ns
@@ -442,7 +441,7 @@
   (name-of-in-ns (first-form "(in-ns 'hello.person)"))
   ;; => "hello.person"
 
-  )
+ ,)
 
 (defn detect-ns
   [source]
@@ -485,7 +484,7 @@
   ;; => "target-ns.main"
 
   (def src-with-ns-in-meta-node
-  "(ns ^{:doc \"some doc string\"
+   "(ns ^{:doc \"some doc string\"
        :author \"some author\"}
   funname.here
   (:refer-clojure :exclude (replace remove next)))")
@@ -520,4 +519,4 @@
   (detect-ns src-with-in-ns)
   ;; => "clojure.core"
 
-  )
+ ,)
