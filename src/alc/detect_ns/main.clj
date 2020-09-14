@@ -8,8 +8,7 @@
    [alc.detect-ns.impl.ast :as ast]
    [alc.detect-ns.impl.ex :as ex]
    [alc.detect-ns.impl.validate :as validate]
-   [clojure.java.io :as cji]
-   [clojure.string :as cs])
+   [clojure.java.io :as cji])
   (:gen-class))
 
 (set! *warn-on-reflection* true)
