@@ -21,7 +21,7 @@ print](doc/limitations.md).
 ## Quick Trial
 
 Suppose there is a file with Clojure source with file path
-`~/src/my-project/src/fun.clj"
+`~/src/my-project/src/fun.clj`
 
 Detect a namespace for the file by:
 
